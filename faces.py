@@ -4,7 +4,7 @@ import cv2
 from time import sleep
 
 face_cascade = cv2.CascadeClassifier('/home/icurus/project/ai_projects/secrurity-2.0/src/cascades/data/haarcascade_frontalface_default.xml')
-eye_cascade = cv2.CascadeClassifier('/home/icurus/project/ai_projects/secrurity-2.0/src/cascades/data/haarcascade_eye.xml  ')
+eye_cascade = cv2.CascadeClassifier('/home/icurus/project/ai_projects/secrurity-2.0/src/cascades/data/haarcascade_eye.xml')
 
 class MainWindow:
     def __init__(self, window, cap):
@@ -18,6 +18,7 @@ class MainWindow:
 
         # Create canvas for image
         self.canvas = tk.Canvas(self.window, width=self.width, height=self.height)
+        # self.canvas = tk.Canvas(self.window)
         # creates a canvas equal to the capture width and the capture height
         self.canvas.grid(row=0, column=0)
         # sets the canvas as the first index position
@@ -43,7 +44,7 @@ class MainWindow:
         # Get the latest frame and convert image format
         self.image = cv2.cvtColor(self.cap.read()[1], cv2.COLOR_BGR2RGB)  # changes the colour format to to RGB
         self.gray = cv2.cvtColor(self.cap.read()[1], cv2.COLOR_BGR2GRAY)  # changes the colour format to grey
-        self.faces = face_cascade.detectMultiScale(self.gray) #scaleFactor=1.5,  minNeighbors=5
+        self.faces = face_cascade.detectMultiScale(self.gray,1.1,3) #scaleFactor=1.5,  minNeighbors=5
         print(len(self.faces))
         for (x, y, w, h) in self.faces:
             cv2.rectangle(self.image, (x, y), (x + w, y + h), (255, 0, 0), 2)

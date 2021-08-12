@@ -1,10 +1,21 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import cv2
+import pickle
 from time import sleep
 
 face_cascade = cv2.CascadeClassifier('/home/icurus/project/ai_projects/secrurity-2.0/src/cascades/data/haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier('/home/icurus/project/ai_projects/secrurity-2.0/src/cascades/data/haarcascade_eye.xml')
+
+recognizer = cv2.face.LBPHFaceRecognizer_create()
+recognizer.read("./src/recognizers/face-trainner.yml")
+
+labels = {"person_name": 0}
+with open("pickles/face-labels.pickle", 'rb') as f:
+    og_labels = pickle.load(f)
+    labels = {v: k for k, v in og_labels.items()}
+    print(labels)
+
 
 class MainWindow:
     def __init__(self, window, cap):
@@ -46,11 +57,20 @@ class MainWindow:
         self.gray = cv2.cvtColor(self.cap.read()[1], cv2.COLOR_BGR2GRAY)  # changes the colour format to grey
         self.faces = face_cascade.detectMultiScale(self.gray,1.1,3) #scaleFactor=1.5,  minNeighbors=5
         print(len(self.faces))
+
         for (x, y, w, h) in self.faces:
             cv2.rectangle(self.image, (x, y), (x + w, y + h), (255, 0, 0), 2)
             roi_gray = self.gray[y:y + h, x:x + w]
             roi_color = self.image[y:y + h, x:x + w]
             eyes = eye_cascade.detectMultiScale(roi_gray)
+            id_, conf = recognizer.predict(roi_gray)
+            if conf >= 4 and conf <= 85:
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                name = labels[id_]
+                color = (255, 255, 255)
+                stroke = 2
+                cv2.putText(self.image, name, (x, y), font, 1, color, stroke, cv2.LINE_AA)
+
             for (ex, ey, ew, eh) in eyes:
                 cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
         self.convert_and_print()
